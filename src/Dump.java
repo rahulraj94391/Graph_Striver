@@ -546,7 +546,7 @@ class Solution_isPossible {
 }
 
 class Solution_topoSort_bfs {
-    static int[] topoSort(int V, ArrayList<ArrayList<Integer>> adj) {
+    public int[] topoSort(int V, ArrayList<ArrayList<Integer>> adj) {
         Queue<Integer> q = new LinkedList<>();
         int[] indegree = new int[V];
         int[] topoSort = new int[V];
@@ -583,11 +583,11 @@ class Solution_topoSort_bfs {
 }
 
 class Solution_topoSort_dfs {
-    private static Stack<Integer> st = new Stack<>();
-    private static ArrayList<ArrayList<Integer>> adj;
-    private static boolean[] vis;
+    private Stack<Integer> st = new Stack<>();
+    private ArrayList<ArrayList<Integer>> adj;
+    private boolean[] vis;
 
-    static int[] topoSort(int V, ArrayList<ArrayList<Integer>> adjList) {
+    int[] topoSort(int V, ArrayList<ArrayList<Integer>> adjList) {
         adj = adjList;
         vis = new boolean[V];
 
@@ -604,7 +604,7 @@ class Solution_topoSort_dfs {
         return topoSort;
     }
 
-    private static void dfs(int node) {
+    private void dfs(int node) {
         vis[node] = true;
         for (int nei : adj.get(node)) {
             if (!vis[nei]) {
@@ -615,18 +615,53 @@ class Solution_topoSort_dfs {
     }
 }
 
-class Solution_eventualSafeNodes {
-    private final ArrayList<Integer> safeNodes = new ArrayList<>();
+class Solution_eventualSafeNodes_BFS {
+    List<Integer> eventualSafeNodes(int V, List<List<Integer>> adj) {
+        List<List<Integer>> adjRev = new ArrayList<>();
+        for (int i = 0; i < V; i++) {
+            adjRev.add(new ArrayList<>());
+        }
+
+        int[] indegree = new int[V];
+        for (int node = 0; node < V; node++) {
+            for (int nei : adj.get(node)) {
+                adjRev.get(nei).add(node);
+                indegree[node]++;
+            }
+        }
+
+        Queue<Integer> q = new LinkedList<>();
+        List<Integer> safeNodes = new ArrayList<>();
+        for (int node = 0; node < V; node++) {
+            if (indegree[node] == 0) q.add(node);
+        }
+
+        while (!q.isEmpty()) {
+            int node = q.poll();
+            safeNodes.add(node);
+            for (int nei : adjRev.get(node)) {
+                if (--indegree[nei] == 0) {
+                    q.add(nei);
+                }
+            }
+        }
+
+        Collections.sort(safeNodes);
+        return safeNodes;
+    }
+}
+
+class Solution_eventualSafeNodes_DFS {
     private List<List<Integer>> adj;
     private boolean[] vis;
     private boolean[] pathVis;
-    private boolean[] check;
+    private boolean[] safeNode;
 
     List<Integer> eventualSafeNodes(int V, List<List<Integer>> adjList) {
         adj = adjList;
         vis = new boolean[V];
         pathVis = new boolean[V];
-        check = new boolean[V];
+        safeNode = new boolean[V];
 
         for (int i = 0; i < V; i++) {
             if (!vis[i]) {
@@ -634,27 +669,36 @@ class Solution_eventualSafeNodes {
             }
         }
 
+        ArrayList<Integer> ans = new ArrayList<>();
         for (int i = 0; i < V; i++) {
-            if (check[i]) safeNodes.add(i);
+            if (safeNode[i]) ans.add(i);
         }
 
-        return safeNodes;
+        return ans;
     }
 
+    // return true if cycle found, else false
     private boolean dfs(int node) {
         vis[node] = true;
         pathVis[node] = true;
-        check[node] = false;
+        safeNode[node] = false;
         for (int nei : adj.get(node)) {
             if (!vis[nei]) {
                 if (dfs(nei)) {
+                    safeNode[node] = false; // If there is a cycle, it
+                    // cannot be the part of safeNode.
+
                     return true;
                 }
             } else if (pathVis[nei]) {
+                safeNode[node] = false; // Cycle found on 'nei' so 'node'
+                // cannot be the part of safeNode,
+                // since node leads to a cycle.
+
                 return true;
             }
         }
-        check[node] = true;
+        safeNode[node] = true; // if 'node' completes the dfs call
         pathVis[node] = false;
         return false;
     }
@@ -696,6 +740,41 @@ class Solution_isCyclic {
         }
         pathVis[node] = false;
         return false;
+    }
+}
+
+class Solution_isBipartite_DFS {
+    private int[] color;
+    private ArrayList<ArrayList<Integer>> adj;
+
+    public boolean isBipartite(int V, ArrayList<ArrayList<Integer>> adj) {
+        this.adj = adj;
+        color = new int[V];
+        Arrays.fill(color, -1);
+
+        for (int i = 0; i < V; i++) {
+            if (color[i] == -1) {
+                if (!dfs(i, 0)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean dfs(int node, int col) {
+        color[node] = col;
+
+        for (int nei : adj.get(node)) {
+            if (color[nei] == -1) {
+                if (!dfs(nei, 1 - col)) {
+                    return false;
+                }
+            } else if (color[nei] == col) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
@@ -968,6 +1047,38 @@ class Solution_DFS_Of_Graph {
                 helper(nei, adj);
             }
         }
+    }
+}
+
+class Solution_Word_Ladder_I {
+    public int ladderLength(String startWord, String targetWord, List<String> wordList) {
+        Queue<Pair> q = new LinkedList<>();
+        q.add(new Pair(startWord, 0));
+
+        Set<String> st = new HashSet<>(wordList);
+        st.remove(startWord);
+
+        while (!q.isEmpty()) {
+            Pair pair = q.poll();
+            String word = pair.word;
+            int steps = pair.step;
+
+            if (word.equals(targetWord)) return steps + 1;
+
+            for (int i = 0; i < word.length(); i++) {
+                for (char ch = 'a'; ch <= 'z'; ch++) {
+                    String replaced = word.substring(0, i) + ch + word.substring(i + 1);
+                    if (st.contains(replaced)) {
+                        st.remove(replaced);
+                        q.add(new Pair(replaced, steps + 1));
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    private record Pair(String word, int step) {
     }
 }
 
