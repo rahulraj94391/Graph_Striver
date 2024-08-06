@@ -309,7 +309,7 @@ class Solution_shortestPath_undirectedGraph_withUnitWt {
         while (!q.isEmpty()) {
             int node = q.poll();
             for (int nei : adj.get(node)) {
-                if (dist[nei] + 1 < dist[node]) {
+                if (dist[node] + 1 < dist[nei]) {
                     dist[nei] = dist[node] + 1;
                     q.add(nei);
                 }
@@ -344,7 +344,16 @@ class Solution_shortestPath_DAG {
         boolean[] vis = new boolean[N];
         Stack<Integer> st = new Stack<>();
 
-        // do dfs component wise
+        /*
+         Why TOPO SORT?
+         Finding the shortest path to a vertex is easy if you already know the shortest paths to all the vertices
+         that can precede it. Finding the longest path to a vertex in DAG is straightforward if you already know
+         the longest path to all the vertices that can precede it.
+         Processing the vertices in topological order ensures that by the time you get to a vertex, you've already
+         processed all the vertices that can precede it.
+         Dijkstra's algorithm is necessary for graphs that can contain cycles because they can't be
+         topologically sorted.
+        */
         for (int i = 0; i < N; i++) {
             if (!vis[i]) {
                 topoSort(i, adj, vis, st);
@@ -704,7 +713,7 @@ class Solution_eventualSafeNodes_DFS {
     }
 }
 
-class Solution_isCyclic {
+class Solution_Detect_Cycle_Directed_Graph {
     private ArrayList<ArrayList<Integer>> adj;
     private boolean[] vis;
     private boolean[] pathVis;
@@ -1028,6 +1037,68 @@ class Solution_FloodFill {
     }
 }
 
+
+class Solution_Rotting_Orange {
+    public int orangesRotting(int[][] grid) {
+        int n = grid.length;
+        int m = grid[0].length;
+        Queue<Pair> q = new LinkedList<>();
+        int[][] vis = new int[n][m];
+        int cntFresh = 0;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == 2) {
+                    q.add(new Pair(i, j, 0));
+                    vis[i][j] = 2;
+                } else {
+                    vis[i][j] = 0;
+                }
+                if (grid[i][j] == 1) {
+                    cntFresh++;
+                }
+            }
+        }
+
+        int tm = 0;
+        int[] drow = {-1, 0, 1, 0};
+        int[] dcol = {0, 1, 0, -1};
+        int cnt = 0;
+        while (!q.isEmpty()) {
+            int r = q.peek().row;
+            int c = q.peek().col;
+            int t = q.peek().time;
+            tm = Math.max(tm, t);
+            q.remove();
+
+            for (int i = 0; i < 4; i++) {
+                int nrow = r + drow[i];
+                int ncol = c + dcol[i];
+                if (nrow >= 0 && nrow < n &&
+                        ncol >= 0 && ncol < m &&
+                        vis[nrow][ncol] == 0 &&
+                        grid[nrow][ncol] == 1) {
+                    q.add(new Pair(nrow, ncol, t + 1));
+                    vis[nrow][ncol] = 2;
+                    cnt++;
+                }
+            }
+        }
+        if (cnt != cntFresh) return -1;
+        return tm;
+    }
+
+    private static class Pair {
+        int row, col, time;
+
+        Pair(int r, int c, int t) {
+            row = r;
+            col = c;
+            time = t;
+        }
+    }
+}
+
 class Solution_DFS_Of_Graph {
     private final ArrayList<Integer> ans = new ArrayList<>();
     private int[] vis;
@@ -1065,6 +1136,10 @@ class Solution_Word_Ladder_I {
 
             if (word.equals(targetWord)) return steps + 1;
 
+            // Poll word from queue and start replacing each character from i: 0-> length,
+            // if the new word is in the word list, then add it to queue with an incremented
+            // step. And remove the word from wordlist, to prevent going back to that specific
+            // word in the future iteration which will unnecessarily increase the step count.
             for (int i = 0; i < word.length(); i++) {
                 for (char ch = 'a'; ch <= 'z'; ch++) {
                     String replaced = word.substring(0, i) + ch + word.substring(i + 1);
