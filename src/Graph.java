@@ -56,9 +56,9 @@ class Solution_Flood_Fill {
     private int newColor;
 
     public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
-        iniColor = image[sr][sc];
+        this.iniColor = image[sr][sc];
         this.newColor = newColor;
-        ans = new int[image.length][image[0].length];
+        this.ans = new int[image.length][image[0].length];
         for (int i = 0; i < image.length; i++) {
             System.arraycopy(image[i], 0, ans[i], 0, image[0].length);
         }
@@ -215,27 +215,32 @@ class Solution_Replace_O_with_X {
 
         // traverse only boundary without changing O's to X's
         allowMarking = false;
-        for (int i = 0; i < cols; i++) {
-            if (!vis[0][i] && ans[0][i] == CHAR_O) {
-                dfs(0, i);
+
+        // top side (left to right)
+        for (int c = 0; c < cols; c++) {
+            if (!vis[0][c] && ans[0][c] == CHAR_O) {
+                dfs(0, c);
             }
         }
 
-        for (int i = 0; i < cols; i++) {
-            if (!vis[rows - 1][i] && ans[rows - 1][i] == CHAR_O) {
-                dfs(rows - 1, i);
+        // bottom side (left to right)
+        for (int c = 0; c < cols; c++) {
+            if (!vis[rows - 1][c] && ans[rows - 1][c] == CHAR_O) {
+                dfs(rows - 1, c);
             }
         }
 
-        for (int i = 0; i < rows; i++) {
-            if (!vis[i][0] && ans[i][0] == CHAR_O) {
-                dfs(i, 0);
+        // left side (top to bottom)
+        for (int r = 0; r < rows; r++) {
+            if (!vis[r][0] && ans[r][0] == CHAR_O) {
+                dfs(r, 0);
             }
         }
 
-        for (int i = 0; i < rows; i++) {
-            if (!vis[i][cols - 1] && ans[i][cols - 1] == CHAR_O) {
-                dfs(i, cols - 1);
+        // right side (top to bottom)
+        for (int r = 0; r < rows; r++) {
+            if (!vis[r][cols - 1] && ans[r][cols - 1] == CHAR_O) {
+                dfs(r, cols - 1);
             }
         }
 
@@ -868,7 +873,7 @@ class Solution_Word_Ladder_I {
 }
 
 // G32, 33, 34
-class Solution_dijkstra {
+class Solution_Dijkstra {
     static int[] dijkstra(int V, ArrayList<ArrayList<ArrayList<Integer>>> adj, int S) {
         PriorityQueue<Pair> pq = new PriorityQueue<>((x, y) -> x.distance - y.distance);
         int[] dist = new int[V];
@@ -905,7 +910,6 @@ class Solution_dijkstra {
         }
     }
 }
-
 
 
 /*------------------------------------------------------------------------------------------------------*/
