@@ -1,0 +1,67 @@
+1368. Minimum Cost to Make at Least One Valid Path in a Grid
+
+Ver 2.0
+
+
+
+Ver 1.0
+class Solution {
+    private int[][] mat;
+    private int m = 0, n = 0;
+    private boolean[][] vis;
+
+    public int minCost(int[][] grid) {
+        mat = grid;
+        m = grid.length;
+        n = grid[0].length;
+        vis = new boolean[m][n];
+        return helper(0, 0);
+    }
+
+    private int helper(int i, int j) {
+        if (i == m - 1 && j == n - 1) return 0;
+        vis[i][j] = true;
+
+        int right = (int) 1e9;
+        if (isInBound(i, j + 1) && isNotVisited(i, j + 1)) {
+            right = helper(i, j + 1) + mat[i][j + 1] == 1 ? 0 : 1;
+        }
+
+        int left = (int) 1e9;
+        if (isInBound(i, j - 1) && isNotVisited(i, j - 1)) {
+            left = helper(i, j - 1) + mat[i][j - 1] == 2 ? 0 : 1;
+        }
+
+        int down = (int) 1e9;
+        if (isInBound(i + 1, j) && isNotVisited(i + 1, j)) {
+            down = helper(i + 1, j) + mat[i + 1][j] == 3 ? 0 : 1;
+        }
+
+        int up = (int) 1e9;
+        if (isInBound(i - 1, j) && isNotVisited(i - 1, j)) {
+            up = helper(i - 1, j) + mat[i - 1][j] == 4 ? 0 : 1;
+        }
+
+
+        vis[i][j] = false;
+        int min = getMin(right, left, down, up);
+        System.out.println(STR."i:\{i} j:\{j}\nright:\{right}  left:\{left}  down:\{down}  up:\{up}\nmin:\{min}\n");
+        return min;
+    }
+
+    private int getMin(int... nums) {
+        int min = (int) 1e9;
+        for (int num : nums) {
+            min = Math.min(min, num);
+        }
+        return min;
+    }
+
+    private boolean isInBound(int i, int j) {
+        return (i >= 0 && i < m) && (j >= 0 && j < n);
+    }
+
+    private boolean isNotVisited(int i, int j) {
+        return !vis[i][j];
+    }
+}
